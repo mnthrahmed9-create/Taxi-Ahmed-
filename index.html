@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>IRAQ MIND MAP 3D — VIVID</title>
+<title>IRAQ MIND MAP 3D — FULL VIVID</title>
 
 <link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
 <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
@@ -46,8 +46,7 @@ html,body{
 #loading .ring{
   width:70px;height:70px;border-radius:50%;
   border:3px solid transparent;
-  border-top-color:#00f5ff;
-  border-right-color:#ff006e;
+  border-top-color:#00f5ff;border-right-color:#ff006e;
   border-bottom-color:#ffe600;
   animation:spin 1.2s linear infinite;margin-bottom:22px;
   box-shadow:0 0 30px #00f5ff66;
@@ -71,11 +70,9 @@ html,body{
 .retryBtn{
   margin-top:16px;padding:11px 24px;
   background:linear-gradient(135deg,#ff006e,#b537f2);
-  color:#fff;font-weight:700;
-  border:0;border-radius:10px;
+  color:#fff;font-weight:700;border:0;border-radius:10px;
   cursor:pointer;font-family:inherit;font-size:13px;
-  transition:.18s;
-  box-shadow:0 4px 20px #ff006e77;
+  transition:.18s;box-shadow:0 4px 20px #ff006e77;
 }
 .retryBtn:hover{transform:translateY(-1px);box-shadow:0 6px 28px #ff006eaa}
 
@@ -86,12 +83,10 @@ html,body{
   pointer-events:none;
 }
 .logo,.status{
-  background:var(--panel);
-  border:1px solid var(--line);
+  background:var(--panel);border:1px solid var(--line);
   border-radius:14px;padding:10px 14px;
   font-size:11px;line-height:1.7;
-  backdrop-filter:blur(16px);
-  pointer-events:auto;
+  backdrop-filter:blur(16px);pointer-events:auto;
   box-shadow:0 8px 40px #4a2dff55, 0 0 0 1px #4a2dff33 inset;
 }
 .logo strong{
@@ -106,8 +101,7 @@ html,body{
 }
 .status b{color:var(--lime);font-weight:700;text-shadow:0 0 12px var(--lime)}
 .dotlive{
-  width:9px;height:9px;border-radius:50%;
-  background:var(--lime);
+  width:9px;height:9px;border-radius:50%;background:var(--lime);
   box-shadow:0 0 12px var(--lime),0 0 24px var(--lime);
   animation:blink 1.6s infinite;
 }
@@ -118,8 +112,7 @@ button{font-family:inherit}
   padding:11px 15px;color:#fff;font-size:12px;cursor:pointer;font-weight:600;
   background:linear-gradient(135deg,rgba(20,10,50,.92),rgba(10,30,60,.92));
   border:1px solid #4a2dff;border-radius:11px;
-  backdrop-filter:blur(12px);
-  transition:.18s;white-space:nowrap;
+  backdrop-filter:blur(12px);transition:.18s;white-space:nowrap;
   box-shadow:0 4px 20px #4a2dff44;
 }
 .tool:hover{
@@ -147,7 +140,6 @@ button{font-family:inherit}
 @keyframes slideIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
 #panel::-webkit-scrollbar{width:7px}
 #panel::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#00f5ff,#ff006e);border-radius:4px}
-
 #panel h2{
   margin:0 0 4px;font-size:21px;font-weight:800;
   background:linear-gradient(90deg,#00f5ff,#ffe600,#ff006e);
@@ -157,8 +149,7 @@ button{font-family:inherit}
 #panel .enName{font-size:11px;color:#8fb8e8;margin:0 0 14px;letter-spacing:1px;font-weight:600}
 #panel h3{
   font-size:12px;margin:20px 0 10px;letter-spacing:.6px;font-weight:700;
-  color:#ffe600;
-  padding-bottom:7px;
+  color:#ffe600;padding-bottom:7px;
   border-bottom:1px solid #4a2dff66;
   text-shadow:0 0 12px #ffe60066;
 }
@@ -168,8 +159,7 @@ button{font-family:inherit}
 .stat{
   background:linear-gradient(135deg,rgba(74,45,255,.15),rgba(181,55,242,.15));
   border:1px solid #4a2dff77;border-radius:12px;
-  padding:10px 11px;
-  position:relative;overflow:hidden;
+  padding:10px 11px;position:relative;overflow:hidden;
 }
 .stat::before{
   content:'';position:absolute;top:0;right:0;
@@ -186,14 +176,12 @@ button{font-family:inherit}
   width:100%;padding:11px 8px;font-size:11.5px;font-weight:600;
   border:1px solid #4a2dff88;border-radius:11px;
   background:linear-gradient(135deg,rgba(74,45,255,.2),rgba(181,55,242,.15));
-  color:#e8f4ff;cursor:pointer;
-  transition:.16s;text-align:center;
+  color:#e8f4ff;cursor:pointer;transition:.16s;text-align:center;
 }
 #branches button:hover{
   background:linear-gradient(135deg,#4a2dff,#b537f2);
   border-color:#00f5ff;color:#fff;
-  box-shadow:0 0 20px #b537f288;
-  transform:translateY(-1px);
+  box-shadow:0 0 20px #b537f288;transform:translateY(-1px);
 }
 #branches button.active{
   background:linear-gradient(135deg,#ffe600,#ff006e);
@@ -207,15 +195,11 @@ button{font-family:inherit}
   border-radius:12px;cursor:pointer;font-size:12px;font-weight:700;
   border:1px solid #4a2dff;
   background:linear-gradient(135deg,#1a1060,#2a1580);
-  color:#fff;
-  transition:.16s;
-  box-shadow:0 4px 16px #4a2dff44;
+  color:#fff;transition:.16s;box-shadow:0 4px 16px #4a2dff44;
 }
 .panelActions button:hover{
   background:linear-gradient(135deg,#4a2dff,#b537f2);
-  border-color:#00f5ff;
-  box-shadow:0 0 24px #b537f288;
-  transform:translateY(-1px);
+  border-color:#00f5ff;box-shadow:0 0 24px #b537f288;transform:translateY(-1px);
 }
 .panelActions button.danger{
   border-color:#ff006e;
@@ -224,8 +208,7 @@ button{font-family:inherit}
 }
 .panelActions button.danger:hover{
   background:linear-gradient(135deg,#ff006e,#b537f2);
-  color:#fff;
-  box-shadow:0 0 24px #ff006e88;
+  color:#fff;box-shadow:0 0 24px #ff006e88;
 }
 
 #close{
@@ -233,13 +216,11 @@ button{font-family:inherit}
   background:linear-gradient(135deg,#4a2dff,#b537f2);
   color:#fff;border:0;border-radius:10px;
   cursor:pointer;font-size:15px;font-weight:800;
-  transition:.16s;
-  box-shadow:0 4px 16px #4a2dff66;
+  transition:.16s;box-shadow:0 4px 16px #4a2dff66;
 }
 #close:hover{
   background:linear-gradient(135deg,#ff006e,#b537f2);
-  transform:rotate(90deg);
-  box-shadow:0 0 24px #ff006e88;
+  transform:rotate(90deg);box-shadow:0 0 24px #ff006e88;
 }
 
 /* قائمة المحافظات */
@@ -257,8 +238,7 @@ button{font-family:inherit}
 #sideList h4{
   margin:2px 0 11px;font-size:12px;font-weight:700;letter-spacing:.5px;
   display:flex;justify-content:space-between;align-items:center;
-  color:#ffe600;
-  text-shadow:0 0 10px #ffe60077;
+  color:#ffe600;text-shadow:0 0 10px #ffe60077;
 }
 #search{
   width:100%;padding:10px 12px;margin-bottom:10px;
@@ -280,8 +260,7 @@ button{font-family:inherit}
   display:flex;align-items:center;gap:10px;
   padding:9px 10px;border-radius:11px;cursor:pointer;
   font-size:12.5px;color:#d9ecff;transition:.15s;
-  border:1px solid transparent;
-  font-weight:500;
+  border:1px solid transparent;font-weight:500;
 }
 .provItem:hover{
   background:linear-gradient(90deg,rgba(74,45,255,.25),rgba(181,55,242,.15));
@@ -312,8 +291,7 @@ button{font-family:inherit}
   background:radial-gradient(circle at 35% 35%,#ffffff,#00f5ff 45%,#ff006e);
   border:2px solid #fff;
   box-shadow:0 0 12px #00f5ff,0 0 26px #ff006e,0 0 40px #00f5ff88;
-  animation:pulse 2.4s infinite;
-  transition:.2s;
+  animation:pulse 2.4s infinite;transition:.2s;
 }
 .node:hover .dot{
   transform:scale(1.5);
@@ -321,18 +299,13 @@ button{font-family:inherit}
   box-shadow:0 0 20px #ffe600,0 0 40px #ff006e;
 }
 @keyframes pulse{
-  0%,100%{
-    box-shadow:0 0 0 0 #00f5ff99,0 0 12px #00f5ff,0 0 26px #ff006e;
-  }
-  55%{
-    box-shadow:0 0 0 12px #00f5ff00,0 0 24px #00f5ff,0 0 40px #ff006e;
-  }
+  0%,100%{box-shadow:0 0 0 0 #00f5ff99,0 0 12px #00f5ff,0 0 26px #ff006e}
+  55%{box-shadow:0 0 0 12px #00f5ff00,0 0 24px #00f5ff,0 0 40px #ff006e}
 }
 .node-label{
   position:absolute;left:50%;bottom:15px;transform:translateX(-50%);
   background:rgba(10,4,30,.94);
-  border:1px solid #4a2dff;
-  border-radius:9px;padding:4px 10px;
+  border:1px solid #4a2dff;border-radius:9px;padding:4px 10px;
   color:#fff;white-space:nowrap;font-size:11px;font-weight:600;
   pointer-events:none;
   box-shadow:0 4px 16px #4a2dff88,0 0 16px #00f5ff44;
@@ -346,10 +319,10 @@ button{font-family:inherit}
 
 /* إشعار */
 #toast{
-  position:absolute;z-index:70;bottom:80px;right:50%;transform:translateX(50%) translateY(20px);
+  position:absolute;z-index:70;bottom:80px;right:50%;
+  transform:translateX(50%) translateY(20px);
   background:linear-gradient(135deg,rgba(74,45,255,.95),rgba(181,55,242,.9));
-  border:1px solid #00f5ff;
-  border-radius:13px;
+  border:1px solid #00f5ff;border-radius:13px;
   padding:12px 20px;font-size:13px;color:#fff;font-weight:600;
   opacity:0;pointer-events:none;transition:.3s;
   box-shadow:0 10px 44px #4a2dff88,0 0 24px #00f5ff88;
@@ -357,7 +330,6 @@ button{font-family:inherit}
 }
 #toast.show{opacity:1;transform:translateX(50%) translateY(0)}
 
-/* الجوال */
 @media(max-width:720px){
   #sideList{width:min(250px,74vw);top:120px}
   #panel{width:min(330px,92vw);top:120px}
@@ -435,7 +407,7 @@ button{font-family:inherit}
 
 <script>
 /* =========================================================
-   IRAQ MIND MAP 3D — VIVID NEON EDITION
+   IRAQ MIND MAP 3D — FULL VIVID NEON EDITION
    ========================================================= */
 
 const PROVINCE_META = [
@@ -459,26 +431,11 @@ const PROVINCE_META = [
  {ar:'السليمانية',en:'Sulaymaniyah',  cap:'السليمانية',area:17023,  pop:2000000, c:[45.436,35.561], note:'مركز ثقافي كردي وموطن جبال حمرين وأزمر.'}
 ];
 
-/* 🎨 باليت نيون زاهية — 18 لون */
+/* 🎨 باليت نيون زاهية */
 const COLORS = [
-  '#FF006E', // وردي ساخن
-  '#FB5607', // برتقالي ناري
-  '#FFBE0B', // أصفر ذهبي
-  '#8338EC', // بنفسجي كهربائي
-  '#3A86FF', // أزرق سماوي
-  '#06FFA5', // أخضر نعناعي
-  '#FF4D6D', // مرجاني
-  '#00F5D4', // فيروزي
-  '#F15BB5', // وردي فوشيا
-  '#9B5DE5', // بنفسجي فاتح
-  '#FEE440', // أصفر ليموني
-  '#00BBF9', // أزرق نيون
-  '#FB8500', // برتقالي كهرماني
-  '#E63946', // أحمر قرمزي
-  '#2EC4B6', // تركواز
-  '#FF9F1C', // برتقالي ذهبي
-  '#7209B7', // بنفسجي ملكي
-  '#00F5D4'  // فيروزي
+  '#FF006E','#FB5607','#FFBE0B','#8338EC','#3A86FF','#06FFA5',
+  '#FF4D6D','#00F5D4','#F15BB5','#9B5DE5','#FEE440','#00BBF9',
+  '#FB8500','#E63946','#2EC4B6','#FF9F1C','#7209B7','#00F5D4'
 ];
 
 function norm(s){
@@ -554,13 +511,216 @@ function hideLoading(){
   l.style.opacity = '0';
   setTimeout(()=>{ l.style.display = 'none'; }, 550);
 }
-
 function withTimeout(promise, ms){
   return Promise.race([
     promise,
     new Promise((_, r)=> setTimeout(()=>r(new Error('timeout')), ms))
   ]);
 }
+
+/* =========================================================
+   🎨 الثيم الزاهي — تلوين كامل الخريطة الأساسية
+   ========================================================= */
+
+function applyVividTheme(){
+  const style = map.getStyle();
+  if(!style || !style.layers) return;
+
+  const layers = style.layers;
+
+  layers.forEach(layer => {
+    const id = layer.id;
+    const srcLayer = layer['source-layer'] || '';
+    const type = layer.type;
+
+    try{
+      /* 1️⃣ الخلفية → بنفسجي فضائي */
+      if(type === 'background'){
+        map.setPaintProperty(id, 'background-color', '#0a0320');
+        return;
+      }
+
+      /* 2️⃣ الماء → فيروزي نيون */
+      if(srcLayer === 'water'){
+        if(type === 'fill'){
+          map.setPaintProperty(id, 'fill-color', '#00d9ff');
+          map.setPaintProperty(id, 'fill-opacity', 0.9);
+        } else if(type === 'fill-extrusion'){
+          map.setPaintProperty(id, 'fill-extrusion-color', '#00d9ff');
+        } else if(type === 'line'){
+          map.setPaintProperty(id, 'line-color', '#00d9ff');
+        }
+        return;
+      }
+
+      /* 3️⃣ المجاري المائية → فيروزي */
+      if(srcLayer === 'waterway'){
+        if(type === 'line'){
+          map.setPaintProperty(id, 'line-color', '#00f5ff');
+        }
+        return;
+      }
+
+      /* 4️⃣ البيوت (المباني) → مسطحة وردية نيون */
+      if(srcLayer === 'building'){
+        if(type === 'fill'){
+          map.setPaintProperty(id, 'fill-color', '#ff006e');
+          map.setPaintProperty(id, 'fill-opacity', 0.85);
+          map.setPaintProperty(id, 'fill-outline-color', '#ffe600');
+        }
+        return;
+      }
+
+      /* 5️⃣ الحدائق والمساحات الخضراء → أخضر نيون */
+      if(srcLayer === 'landcover' || srcLayer === 'landuse' || srcLayer === 'park'){
+        if(type === 'fill'){
+          map.setPaintProperty(id, 'fill-color', '#06ffa5');
+          map.setPaintProperty(id, 'fill-opacity', 0.5);
+        }
+        return;
+      }
+
+      /* 6️⃣ الطرق → حسب الأهمية */
+      if(srcLayer === 'transportation'){
+        let color = '#b537f2';
+
+        if(/motorway/i.test(id)){
+          if(/casing|outline/i.test(id)) color = '#8a0050';
+          else if(/tunnel/i.test(id)) color = '#a8004a';
+          else color = '#ff006e';
+        }
+        else if(/trunk/i.test(id)){
+          if(/casing|outline/i.test(id)) color = '#8a3000';
+          else color = '#fb5607';
+        }
+        else if(/primary/i.test(id)){
+          if(/casing|outline/i.test(id)) color = '#8a7000';
+          else color = '#ffe600';
+        }
+        else if(/secondary/i.test(id)){
+          color = '#00f5ff';
+        }
+        else if(/tertiary/i.test(id)){
+          color = '#06ffa5';
+        }
+        else if(/minor|residential|service|pedestrian/i.test(id)){
+          color = '#b537f2';
+        }
+        else if(/rail|transit/i.test(id)){
+          color = '#ff8ec7';
+        }
+
+        if(type === 'line'){
+          map.setPaintProperty(id, 'line-color', color);
+          map.setPaintProperty(id, 'line-opacity', 0.92);
+        } else if(type === 'fill'){
+          map.setPaintProperty(id, 'fill-color', color);
+        }
+        return;
+      }
+
+      /* 7️⃣ الحدود الإدارية → ذهبي */
+      if(srcLayer === 'boundary'){
+        if(type === 'line'){
+          map.setPaintProperty(id, 'line-color', '#ffe600');
+          map.setPaintProperty(id, 'line-opacity', 0.85);
+        }
+        return;
+      }
+
+      /* 8️⃣ المعالم (POI) → أيقونات وردية ونصوص بيضاء */
+      if(srcLayer === 'poi' || srcLayer === 'aerodrome_label'){
+        if(type === 'symbol'){
+          try{ map.setPaintProperty(id, 'icon-color', '#ff2ec4'); }catch(e){}
+          try{ map.setPaintProperty(id, 'icon-halo-color', '#1a0045'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-halo-color', '#1a0045'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-halo-width', 1.5); }catch(e){}
+        }
+        return;
+      }
+
+      /* 9️⃣ أسماء المدن → أبيض متوهج */
+      if(srcLayer === 'place'){
+        if(type === 'symbol'){
+          try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-halo-color', '#0a0320'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-halo-width', 1.8); }catch(e){}
+        }
+        return;
+      }
+
+      /* 🔟 أيقونة/نص symbol عام */
+      if(type === 'symbol'){
+        try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
+        try{ map.setPaintProperty(id, 'text-halo-color', '#0a0320'); }catch(e){}
+        try{ map.setPaintProperty(id, 'icon-color', '#ff2ec4'); }catch(e){}
+      }
+
+    }catch(err){
+      /* تجاهل الأخطاء — بعض الطبقات لا تدعم هذه الخصائص */
+    }
+  });
+}
+
+/* 🏠 إضافة مجسمات البيوت 3D بألوان متدرجة */
+function addVividBuildings(){
+  const style = map.getStyle();
+  if(!style || !style.layers) return;
+
+  if(map.getLayer('vivid-buildings')) return;
+
+  let buildingSrc = null;
+  style.layers.forEach(l=>{
+    if(l['source-layer'] === 'building' && l.source) buildingSrc = l.source;
+  });
+  if(!buildingSrc) buildingSrc = 'openmaptiles';
+
+  const firstSymbol = style.layers.find(l => l.type === 'symbol');
+  const beforeId = firstSymbol ? firstSymbol.id : undefined;
+
+  const layer = {
+    id:'vivid-buildings',
+    type:'fill-extrusion',
+    source:buildingSrc,
+    'source-layer':'building',
+    minzoom:13.5,
+    paint:{
+      'fill-extrusion-color':[
+        'interpolate',['linear'],
+        ['coalesce',['get','render_height'],['get','height'],0],
+        0,   '#8338EC',
+        15,  '#b537f2',
+        40,  '#ff006e',
+        80,  '#fb5607',
+        150, '#ffe600'
+      ],
+      'fill-extrusion-height':[
+        'coalesce',['get','render_height'],['get','height'],8
+      ],
+      'fill-extrusion-base':0,
+      'fill-extrusion-opacity':0.9,
+      'fill-extrusion-vertical-gradient':true
+    }
+  };
+
+  try{
+    if(beforeId) map.addLayer(layer, beforeId);
+    else map.addLayer(layer);
+  }catch(err){
+    console.warn('buildings', err);
+  }
+}
+
+/* تطبيق الثيم الكامل */
+function applyFullVividTheme(){
+  try{ applyVividTheme(); }catch(e){ console.warn('theme', e); }
+  try{ addVividBuildings(); }catch(e){ console.warn('buildings', e); }
+}
+
+/* =========================================================
+   أدوات OSM
+   ========================================================= */
 
 function ensureOSMToGeoJSON(){
   if(osmtogeojsonReady) return Promise.resolve();
@@ -609,7 +769,7 @@ async function loadProvincesFromOSM(){
     try{
       const data = await fetchOverpass(OVERPASS_QUERY, OVERPASS_SERVERS[si], 12000);
       if(data && Array.isArray(data.elements) && data.elements.length) return data;
-      lastErr = new Error('empty result');
+      lastErr = new Error('empty');
     } catch(err){
       lastErr = err;
       console.warn('Overpass fail:', OVERPASS_SERVERS[si], err.message);
@@ -709,7 +869,6 @@ function addProvinceLayers(){
 
     map.addSource('provinces', { type:'geojson', data:fc });
 
-    // 🌈 مجسمات ثلاثية الأبعاد بألوان نيون
     map.addLayer({
       id:'province-3d',
       type:'fill-extrusion',
@@ -733,7 +892,6 @@ function addProvinceLayers(){
       }
     });
 
-    // ✨ هالة خارجية عريضة
     map.addLayer({
       id:'province-glow2',
       type:'line',
@@ -747,7 +905,6 @@ function addProvinceLayers(){
       }
     });
 
-    // ✨ هالة داخلية
     map.addLayer({
       id:'province-glow',
       type:'line',
@@ -761,7 +918,6 @@ function addProvinceLayers(){
       }
     });
 
-    // 🔲 الحدود الحادة المتوهجة
     map.addLayer({
       id:'province-border',
       type:'line',
@@ -826,7 +982,6 @@ function createNode(p){
 
   const dot = document.createElement('span');
   dot.className = 'dot';
-  // تلوين النقطة بلون المحافظة
   dot.style.background = `radial-gradient(circle at 35% 35%, #fff, ${p.color} 45%, #ff006e)`;
   dot.style.boxShadow = `0 0 12px ${p.color}, 0 0 26px #ff006e, 0 0 40px ${p.color}88`;
   el.appendChild(dot);
@@ -1054,7 +1209,6 @@ async function runBranch(branch, btn){
       data:{ type:'FeatureCollection', features:feats }
     });
 
-    // 🎨 فرع بتدرج ألوان نيون
     map.addLayer({
       id:'branch-fill', type:'fill', source:'branch',
       paint:{
@@ -1157,6 +1311,7 @@ $('toggleList').addEventListener('click', function(){
 $('clearBranch').addEventListener('click', ()=>clearBranch());
 
 function setupMapBase(){
+  /* ⛰️ DEM */
   try{
     map.addSource('iraq-dem', {
       type:'raster-dem',
@@ -1166,33 +1321,35 @@ function setupMapBase(){
     map.setTerrain({ source:'iraq-dem', exaggeration:1.35 });
   }catch(err){ console.warn('terrain', err); }
 
-  // 💡 إضاءة أقوى للألوان
+  /* 💡 إضاءة قوية جداً */
   try{
     if(map.setLight){
-      map.setLight({ anchor:'viewport', color:'#ffffff', intensity:0.85, position:[1.5,220,50] });
+      map.setLight({ anchor:'viewport', color:'#ffffff', intensity:0.95, position:[1.5,220,50] });
     }
   }catch(err){ console.warn('light', err); }
 
+  /* 🌈 hillshade بألوان زاهية */
   try{
     map.addLayer({
       id:'iraq-hillshade', type:'hillshade', source:'iraq-dem',
       paint:{
-        'hillshade-exaggeration':0.55,
-        'hillshade-shadow-color':'#1a0f3d',
-        'hillshade-highlight-color':'#ffe0ff',
-        'hillshade-accent-color':'#3a1e6b'
+        'hillshade-exaggeration':0.8,
+        'hillshade-shadow-color':'#1a0033',
+        'hillshade-highlight-color':'#ff2ec4',
+        'hillshade-accent-color':'#00f5ff'
       }
     });
   }catch(err){ console.warn('hillshade', err); }
 
-  // 🌌 ضباب بنفسجي زاهي
+  /* 🌌 ضباب فضائي */
   try{
     map.setFog({
       range:[-0.6,2.2], color:'#0a0425', 'horizon-blend':0.25,
-      'high-color':'#1a0045', 'space-color':'#02010a', 'star-intensity':0.6
+      'high-color':'#1a0045', 'space-color':'#02010a', 'star-intensity':0.65
     });
   }catch(err){ console.warn('fog', err); }
 
+  /* 🌠 سماء */
   try{
     map.addLayer({
       id:'sky', type:'sky',
@@ -1231,11 +1388,25 @@ async function loadOSMInBackground(){
   }
 }
 
+/* =========================================================
+   🚀 بدء التشغيل
+   ========================================================= */
+
+/* أول تطبيق — عند اكتمال تحميل الستايل */
+map.on('style.load', ()=>{
+  console.log('Style loaded — applying vivid theme');
+  applyFullVividTheme();
+});
+
 map.on('load', ()=>{
   mapLoaded = true;
   try{
     progress(30, 'جاري إعداد التضاريس...');
     setupMapBase();
+
+    /* 🎨 تطبيق الثيم الزاهي على كل الخريطة */
+    progress(45, 'جاري تلوين الخريطة بألوان نيون...');
+    applyFullVividTheme();
 
     progress(60, 'جاري رسم المحافظات...');
     PROVINCES = buildProvinces(null);
@@ -1249,6 +1420,10 @@ map.on('load', ()=>{
     setTimeout(()=>{
       map.easeTo({ center:[43.8,33.2], zoom:5.2, pitch:52, bearing:-8, duration:1400 });
     }, 200);
+
+    /* إعادة تطبيق الثيم بعد 3 ثوان للتأكد من اكتمال تحميل كل الطبقات */
+    setTimeout(applyFullVividTheme, 3000);
+
   }catch(err){
     console.error('Setup error:', err);
     progress(100, '⚠️ ' + err.message);
