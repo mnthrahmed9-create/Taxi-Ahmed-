@@ -1,0 +1,825 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IRAQ MIND MAP 3D</title>
+
+<link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+
+<style>
+*{box-sizing:border-box}
+html,body,#map{
+ width:100%;height:100%;margin:0;
+ overflow:hidden;
+ font-family:Arial,sans-serif;
+}
+body{background:#07111d;color:white}
+
+#map{position:absolute;inset:0}
+
+#header{
+ position:absolute;
+ top:12px;
+ left:12px;
+ right:12px;
+ z-index:5;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:8px;
+ pointer-events:none;
+}
+.logo,.status{
+ background:#071522eF;
+ border:1px solid #319bc5;
+ border-radius:12px;
+ padding:10px;
+ font-size:12px;
+ pointer-events:auto;
+}
+.logo strong{color:#47dfff;font-size:15px}
+
+#panel{
+ position:absolute;
+ z-index:8;
+ right:12px;
+ top:75px;
+ bottom:12px;
+ width:min(330px,85vw);
+ background:#091727ed;
+ border:1px solid #286d91;
+ border-radius:17px;
+ padding:15px;
+ overflow-y:auto;
+ display:none;
+ box-shadow:0 10px 40px #0008;
+ backdrop-filter:blur(12px);
+}
+#panel h2{color:#4bdcff;margin:5px 0 12px}
+#panel h3{color:#e3c47b;font-size:14px}
+#panel p{font-size:13px;line-height:1.8;color:#d5e4ee}
+#panel button{
+ width:100%;
+ padding:11px;
+ margin:5px 0;
+ border:1px solid #286d91;
+ border-radius:10px;
+ color:white;
+ background:#102b43;
+ text-align:right;
+ cursor:pointer;
+}
+#panel button:hover{background:#17476a}
+
+#close{
+ position:absolute;
+ left:12px;
+ top:12px;
+ width:30px;
+ height:30px;
+ background:#163b55;
+ color:white;
+ border:0;
+ border-radius:8px;
+}
+
+#tools{
+ position:absolute;
+ bottom:15px;
+ left:12px;
+ z-index:6;
+ display:flex;
+ flex-direction:column;
+ gap:8px;
+}
+.tool{
+ padding:12px;
+ color:white;
+ background:#0b2237;
+ border:1px solid #348db4;
+ border-radius:10px;
+ cursor:pointer;
+}
+
+#loading{
+ position:absolute;
+ inset:0;
+ z-index:20;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ background:#050c18;
+ text-align:center;
+ font-size:15px;
+ color:#48d9ff;
+}
+.node{
+ width:15px;height:15px;
+ border-radius:50%;
+ background:#28e3ff;
+ border:3px solid white;
+ box-shadow:0 0 10px #00dfff,0 0 25px #00dfff;
+ cursor:pointer;
+}
+.node-label{
+ position:absolute;
+ top:-30px;
+ right:50%;
+ transform:translateX(50%);
+ background:#071827eF;
+ border:1px solid #36bde9;
+ border-radius:7px;
+ padding:4px 7px;
+ color:white;
+ white-space:nowrap;
+ font-size:11px;
+ pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div id="loading">
+ <div>
+  <h2>IRAQ MIND MAP 3D</h2>
+  <p id="loadText">جاري تحميل خريطة العراق...</p>
+ </div>
+</div>
+
+<div id="header">
+ <div class="logo">
+  <strong>IRAQ MIND MAP 3D</strong><br>
+  الخريطة الذهنية الجغرافية
+ </div>
+ <div class="status" id="status">جاري تحميل المحافظات</div>
+</div>
+
+<div id="panel">
+ <button id="close">✕</button>
+ <h2 id="provinceName">المحافظة</h2>
+ <p id="provinceInfo">معلومات المحافظة</p>
+
+ <h3>الفروع الذهنية الجغرافية</h3>
+ <div id="branches"></div>
+
+ <h3>المعلومات الإدارية</h3>
+ <div id="adminInfo"></div>
+
+ <button id="zoomProvince">تكبير المحافظة</button>
+ <button id="showAll">عرض العراق بالكامل</button>
+</div>
+
+<div id="tools">
+ <button class="tool" id="reset">إعادة عرض العراق</button>
+ <button class="tool" id="terrain">التضاريس 3D</button>
+ <button class="tool" id="labels">إظهار أسماء المحافظات</button>
+</div>
+
+<script>
+
+// ======================================
+// IRAQ MIND MAP 3D
+// ======================================
+
+const map = new maplibregl.Map({
+
+ container:'map',
+
+ style:'https://tiles.openfreemap.org/styles/liberty',
+
+ center:[43.8,33.2],
+
+ zoom:5.2,
+
+ pitch:55,
+
+ bearing:-5,
+
+ maxPitch:85,
+
+ minZoom:4,
+
+ maxZoom:19,
+
+ antialias:true
+
+});
+
+map.addControl(
+ new maplibregl.NavigationControl({
+  visualizePitch:true
+ }),
+ 'bottom-right'
+);
+
+map.addControl(
+ new maplibregl.ScaleControl(),
+ 'bottom-right'
+);
+
+// ======================================
+// بيانات العراق
+// ======================================
+
+let provinces=[];
+let selectedProvince=null;
+let terrainEnabled=true;
+let labelsEnabled=true;
+
+const overpassServers=[
+ 'https://overpass-api.de/api/interpreter',
+ 'https://overpass.kumi.systems/api/interpreter'
+];
+
+const provinceColors=[
+ '#13bde5','#3185dc','#17a99c',
+ '#9366e5','#e39b40','#27b8ca',
+ '#d66c94','#4eaa75','#b48cdd',
+ '#3e9cda','#d1a347','#48c2a8',
+ '#9d76d5','#dc8052','#3694a8',
+ '#b46e9b','#51ad73','#d3ae54'
+];
+
+// ======================================
+// جلب حدود المحافظات من OSM
+// ======================================
+
+async function loadProvinces(){
+
+ const query=`
+ [out:json][timeout:120];
+
+ area["ISO3166-1"="IQ"][admin_level=2]->.iraq;
+
+ (
+  relation["boundary"="administrative"]
+  ["admin_level"="4"](area.iraq);
+ );
+
+ out body geom;
+ `;
+
+ let data=null;
+
+ for(const server of overpassServers){
+
+  try{
+
+   const response=await fetch(server,{
+    method:'POST',
+    headers:{
+     'Content-Type':'application/x-www-form-urlencoded'
+    },
+    body:'data='+encodeURIComponent(query)
+   });
+
+   if(!response.ok)throw new Error('OSM unavailable');
+
+   data=await response.json();
+
+   if(data.elements?.length)break;
+
+  }catch(error){
+   console.warn('Overpass error:',error);
+  }
+ }
+
+ if(!data || !data.elements?.length){
+
+  throw new Error(
+   'تعذر جلب حدود المحافظات. تحقق من الإنترنت وحاول مجدداً.'
+  );
+
+ }
+
+ return data;
+}
+
+// ======================================
+// تحويل بيانات OSM إلى GeoJSON
+// ======================================
+
+async function convertOSM(data){
+
+ const script=document.createElement('script');
+
+ script.src=
+ 'https://cdn.jsdelivr.net/npm/osmtogeojson@3.0.0/osmtogeojson.js';
+
+ document.head.appendChild(script);
+
+ await new Promise((resolve,reject)=>{
+  script.onload=resolve;
+  script.onerror=reject;
+ });
+
+ return osmtogeojson(data,{
+  flatProperties:false
+ });
+
+}
+
+// ======================================
+// مركز المحافظة
+// ======================================
+
+function getCenter(feature){
+
+ const points=[];
+
+ function collect(coords){
+
+  if(typeof coords[0]==='number'){
+   points.push(coords);
+  }else{
+   coords.forEach(collect);
+  }
+
+ }
+
+ collect(feature.geometry.coordinates);
+
+ if(!points.length)return [43.8,33.2];
+
+ let lng=0,lat=0;
+
+ points.forEach(p=>{
+  lng+=p[0];
+  lat+=p[1];
+ });
+
+ return [
+  lng/points.length,
+  lat/points.length
+ ];
+
+}
+
+// ======================================
+// استخراج أسماء المحافظات
+// ======================================
+
+function getName(feature){
+
+ const p=feature.properties || {};
+ const tags=p.tags || {};
+
+ return tags['name:ar'] ||
+        tags.name ||
+        p.name ||
+        'محافظة غير معروفة';
+
+}
+
+// ======================================
+// إضافة المحافظات إلى الخريطة
+// ======================================
+
+function addProvinceLayers(geojson){
+
+ provinces=geojson.features.filter(f=>
+  f.geometry &&
+  ['Polygon','MultiPolygon'].includes(f.geometry.type)
+ );
+
+ if(!provinces.length){
+  throw new Error('لم يتم العثور على حدود المحافظات.');
+ }
+
+ provinces.forEach((feature,i)=>{
+
+  const name=getName(feature);
+
+  const center=getCenter(feature);
+
+  feature.properties.name=name;
+  feature.properties.index=i;
+
+  const sourceId='province-'+i;
+
+  map.addSource(sourceId,{
+   type:'geojson',
+   data:feature
+  });
+
+  // جسم المحافظة المرتفع
+
+  map.addLayer({
+
+   id:sourceId+'-3d',
+
+   type:'fill-extrusion',
+
+   source:sourceId,
+
+   paint:{
+
+    'fill-extrusion-color':provinceColors[i%provinceColors.length],
+
+    'fill-extrusion-height':1800,
+
+    'fill-extrusion-base':0,
+
+    'fill-extrusion-opacity':0.58,
+
+    'fill-extrusion-vertical-gradient':true
+
+   }
+
+  });
+
+  // حدود المحافظة
+
+  map.addLayer({
+
+   id:sourceId+'-border',
+
+   type:'line',
+
+   source:sourceId,
+
+   paint:{
+
+    'line-color':'#65eaff',
+
+    'line-width':2.5,
+
+    'line-opacity':0.9
+
+   }
+
+  });
+
+  feature.properties.center=center;
+
+  // عقدة المحافظة
+
+  createProvinceNode(feature,i);
+
+ });
+
+ document.getElementById('status').textContent=
+ 'تم تحميل '+provinces.length+' محافظة';
+
+}
+
+// ======================================
+// إنشاء عقدة مستقلة للمحافظة
+// ======================================
+
+function createProvinceNode(feature,index){
+
+ const name=getName(feature);
+
+ const center=feature.properties.center;
+
+ const element=document.createElement('div');
+
+ element.className='node';
+
+ const label=document.createElement('div');
+
+ label.className='node-label';
+
+ label.textContent=name;
+
+ element.appendChild(label);
+
+ const marker=new maplibregl.Marker({
+  element,
+  anchor:'center',
+  offset:[0,-22]
+ })
+ .setLngLat(center)
+ .addTo(map);
+
+ element.addEventListener('click',e=>{
+
+  e.stopPropagation();
+
+  selectProvince(feature);
+
+ });
+
+ feature.marker=marker;
+
+}
+
+// ======================================
+// اختيار المحافظة
+// ======================================
+
+function selectProvince(feature){
+
+ selectedProvince=feature;
+
+ const p=feature.properties || {};
+ const tags=p.tags || {};
+
+ const name=getName(feature);
+
+ document.getElementById('provinceName').textContent=name;
+
+ document.getElementById('provinceInfo').textContent=
+ 'محافظة من محافظات العراق. المعلومات التفصيلية تعتمد على بيانات OpenStreetMap المتوفرة.';
+
+ const branches=document.getElementById('branches');
+
+ branches.innerHTML='';
+
+ const branchList=[
+  ['المدن والتجمعات السكانية','place'],
+  ['الأقضية والنواحي','administrative'],
+  ['الطرق والشوارع','highway'],
+  ['الأنهار والمياه','waterway'],
+  ['المعالم والمواقع','tourism'],
+  ['المباني والخدمات','building']
+ ];
+
+ branchList.forEach(item=>{
+
+  const button=document.createElement('button');
+
+  button.textContent='✦ '+item[0];
+
+  button.addEventListener('click',()=>{
+
+   showBranch(item[0],item[1],feature);
+
+  });
+
+  branches.appendChild(button);
+
+ });
+
+ const admin=document.getElementById('adminInfo');
+
+ admin.innerHTML='';
+
+ const fields=[
+  ['الاسم',tags['name:ar']||tags.name||name],
+  ['الاسم الإنجليزي',tags['name:en']],
+  ['المستوى الإداري',tags.admin_level],
+  ['نوع الحدود',tags.boundary],
+  ['المصدر','OpenStreetMap'],
+  ['معرّف OSM',feature.id]
+ ];
+
+ fields.forEach(([label,value])=>{
+
+  if(value===undefined)return;
+
+  const p=document.createElement('p');
+
+  p.textContent=label+': '+value;
+
+  admin.appendChild(p);
+
+ });
+
+ document.getElementById('panel').style.display='block';
+
+ map.flyTo({
+
+  center:feature.properties.center,
+
+  zoom:7.2,
+
+  pitch:65,
+
+  duration:1400
+
+ });
+
+}
+
+// ======================================
+// تفاصيل الفروع
+// ======================================
+
+function showBranch(title,type,feature){
+
+ const name=getName(feature);
+
+ document.getElementById('provinceInfo').textContent=
+ title+' — '+name+
+ '. تظهر البيانات الجغرافية لهذه الفئة من طبقات الخريطة وبيانات OpenStreetMap عند توفرها.';
+
+}
+
+// ======================================
+// بدء المشروع
+// ======================================
+
+map.on('load',async()=>{
+
+ try{
+
+  document.getElementById('loadText').textContent=
+  'جاري تحميل التضاريس وحدود المحافظات...';
+
+  // DEM
+
+  map.addSource('iraq-dem',{
+
+   type:'raster-dem',
+
+   tiles:[
+    'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'
+   ],
+
+   tileSize:256,
+
+   encoding:'terrarium',
+
+   maxzoom:15
+
+  });
+
+  map.setTerrain({
+
+   source:'iraq-dem',
+
+   exaggeration:1.35
+
+  });
+
+  // إضاءة
+
+  if(map.setLight){
+
+   map.setLight({
+
+    anchor:'viewport',
+
+    color:'#ffffff',
+
+    intensity:0.55,
+
+    position:[1.5,210,45]
+
+   });
+
+  }
+
+  // ظلال التضاريس
+
+  map.addLayer({
+
+   id:'iraq-hillshade',
+
+   type:'hillshade',
+
+   source:'iraq-dem',
+
+   paint:{
+
+    'hillshade-exaggeration':0.7,
+
+    'hillshade-shadow-color':'#263747',
+
+    'hillshade-highlight-color':'#ffffff'
+
+   }
+
+  });
+
+  // تحميل المحافظات
+
+  document.getElementById('loadText').textContent=
+  'جاري جلب الحدود الإدارية من OpenStreetMap...';
+
+  const osm=await loadProvinces();
+
+  document.getElementById('loadText').textContent=
+  'جاري تجهيز العقد الذهنية ثلاثية الأبعاد...';
+
+  const geojson=await convertOSM(osm);
+
+  addProvinceLayers(geojson);
+
+  document.getElementById('loading').style.display='none';
+
+ }catch(error){
+
+  console.error(error);
+
+  document.getElementById('loadText').textContent=
+   error.message+
+   ' — أعد تحميل الصفحة للمحاولة مجدداً.';
+
+  document.getElementById('status').textContent='خطأ بالتحميل';
+
+ }
+
+});
+
+// ======================================
+// أدوات التحكم
+// ======================================
+
+document.getElementById('close').onclick=()=>{
+
+ document.getElementById('panel').style.display='none';
+
+};
+
+document.getElementById('reset').onclick=()=>{
+
+ map.flyTo({
+
+  center:[43.8,33.2],
+
+  zoom:5.2,
+
+  pitch:55,
+
+  bearing:0,
+
+  duration:1600
+
+ });
+
+};
+
+document.getElementById('showAll').onclick=()=>{
+
+ document.getElementById('panel').style.display='none';
+
+ map.flyTo({
+
+  center:[43.8,33.2],
+
+  zoom:5.2,
+
+  pitch:55,
+
+  duration:1200
+
+ });
+
+};
+
+document.getElementById('zoomProvince').onclick=()=>{
+
+ if(!selectedProvince)return;
+
+ map.flyTo({
+
+  center:selectedProvince.properties.center,
+
+  zoom:9,
+
+  pitch:70,
+
+  duration:1200
+
+ });
+
+};
+
+document.getElementById('terrain').onclick=()=>{
+
+ terrainEnabled=!terrainEnabled;
+
+ map.setTerrain(
+  terrainEnabled?
+  {source:'iraq-dem',exaggeration:1.35}:
+  null
+ );
+
+};
+
+document.getElementById('labels').onclick=()=>{
+
+ labelsEnabled=!labelsEnabled;
+
+ provinces.forEach(p=>{
+
+  if(p.marker){
+
+   p.marker.getElement().style.display=
+    labelsEnabled?'block':'none';
+
+  }
+
+ });
+
+};
+
+map.on('error',e=>{
+
+ console.warn('Map error:',e.error);
+
+});
+
+</script>
+
+</body>
+</html>
