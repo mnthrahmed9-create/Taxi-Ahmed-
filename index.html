@@ -7,6 +7,8 @@
 
 <link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
 <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<!-- ✅ إضافة مكتبة دعم اللغة العربية (RTL) لحل مشكلة تقطع الحروف -->
+<script src="https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.js"></script>
 
 <style>
 :root{
@@ -419,7 +421,7 @@ button{font-family:inherit}
 
 <script>
 /* =========================================================
-   IRAQ MIND MAP 3D — REAL DATA EDITION (Fixed)
+   IRAQ MIND MAP 3D — REAL DATA EDITION (Fully Fixed)
    ========================================================= */
 
 const PROVINCE_META = [
@@ -514,7 +516,12 @@ function fmtNum(n){
   if(n === null || n === undefined) return '—';
   return Number(n).toLocaleString('en-US');
 }
+
+/* ✅ حماية ضد التكرار لإخفاء التحميل */
+let loadingHidden = false;
 function hideLoading(){
+  if(loadingHidden) return;
+  loadingHidden = true;
   const l = $('loading');
   if(!l) return;
   l.style.opacity = '0';
@@ -525,6 +532,45 @@ function withTimeout(promise, ms){
     promise,
     new Promise((_, r)=> setTimeout(()=>r(new Error('timeout')), ms))
   ]);
+}
+
+/* ✅ جلب مع مؤقت زمني */
+async function fetchWithTimeout(url, ms){
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), ms);
+  try{
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return res;
+  } catch(e){
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
+/* ✅ ستايل احتياطي في حال فشل السيرفر الرئيسي */
+function createFallbackStyle(){
+  return {
+    version: 8,
+    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    sources: {
+      'osm-carto': {
+        type: 'raster',
+        tiles: [
+          'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+        ],
+        tileSize: 512,
+        maxzoom: 19,
+        attribution: '© OpenStreetMap © CARTO'
+      }
+    },
+    layers: [
+      { id:'bg', type:'background', paint:{ 'background-color':'#0a0320' } },
+      { id:'osm-carto-layer', type:'raster', source:'osm-carto', paint:{ 'raster-opacity':0.9 } }
+    ]
+  };
 }
 
 /* =========================================================
@@ -543,7 +589,6 @@ function applyVividTheme(){
 
     try{
       if(type === 'background'){ map.setPaintProperty(id, 'background-color', '#0a0320'); return; }
-      // تخطّي كل الطبقات المخصصة (بدون source-layer من OpenMapTiles)
       if(!srcLayer) return;
 
       if(srcLayer === 'water'){
@@ -861,7 +906,6 @@ function addProvinceLayers(){
     });
   }
 
-  // ====== تسجيل الأحداث مرة واحدة فقط (منع التكرار عند إعادة التحميل) ======
   if(!provinceHandlersRegistered){
     map.on('mousemove','province-3d', e=>{
       if(destPicking) return;
@@ -1160,13 +1204,12 @@ out geom 800;`;
     const feats = (gj.features || []).filter(f => f.geometry);
     if(!feats.length) return false;
 
-    // استخراج ارتفاع حقيقي من الوسوم
     feats.forEach(f => {
       const tags = (f.properties && f.properties.tags) || f.properties || {};
       const h = parseFloat(tags.height) ||
                 parseFloat(tags['building:height']) ||
                 (parseFloat(tags['building:levels']) || 0) * 3.2 ||
-                6; // افتراضي فقط عند غياب البيانات
+                6;
       f.properties = f.properties || {};
       f.properties._h = Math.max(h, 3);
 
@@ -1270,7 +1313,6 @@ out geom 2000;`;
     const feats = (gj.features || []).filter(f => f.geometry && (f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'));
     if(!feats.length) return false;
 
-    // استخراج سرعة رقمية من maxspeed لتجنب مشاكل to-number مع "50 km/h"
     feats.forEach(f => {
       const tags = f.properties || {};
       if(tags.maxspeed){
@@ -1926,7 +1968,6 @@ async function loadOSMInBackground(){
     PROVINCES = newList;
     addProvinceLayers();
 
-    // إعادة تطبيق تعديل الارتفاع إن كانت المباني مفعّلة
     lastBldZoomBucket = -1;
     updateProvinceExtrusionForZoom();
 
@@ -1938,119 +1979,165 @@ async function loadOSMInBackground(){
   }
 }
 
-async function initMap() {
-  try {
-    const res = await fetch('https://tiles.openfreemap.org/styles/liberty');
-    const style = await res.json();
+let mapReady = false;
+let mapHandlersRegistered2 = false;
 
-    style.glyphs = 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf';
+function onMapReady(){
+  if(mapReady) return;
+  mapReady = true;
+
+  try { progress(30, 'جاري إعداد التضاريس...'); } catch(e){}
+  try { setupMapBase(); } catch(e){ console.warn('setupMapBase:', e); }
+
+  try { progress(45, 'جاري تلوين الخريطة...'); } catch(e){}
+  try { applyFullVividTheme(); } catch(e){ console.warn('theme:', e); }
+
+  try { progress(60, 'جاري رسم المحافظات...'); } catch(e){}
+  try {
+    PROVINCES = buildProvinces(null);
+    addProvinceLayers();
+  } catch(e){ console.warn('provinces:', e); }
+
+  if(!mapHandlersRegistered2){
+    try {
+      map.on('click', (e) => {
+        if(!destPicking) return;
+        destPicking = false;
+        map.getCanvas().style.cursor = '';
+        $('pickDest').classList.remove('on');
+        routeToDestination(e.lngLat.lng, e.lngLat.lat);
+      });
+      map.on('moveend', () => {
+        clearTimeout(map._bldTimer);
+        if(buildingsActive) map._bldTimer = setTimeout(()=>loadBuildingsForViewport(true), 1400);
+        clearTimeout(map._rdTimer);
+        if(roadsActive) map._rdTimer = setTimeout(()=>loadRoadsForViewport(true), 1700);
+      });
+      map.on('zoom', updateProvinceExtrusionForZoom);
+      mapHandlersRegistered2 = true;
+    } catch(e){ console.warn('handlers:', e); }
+  }
+
+  try { progress(100, 'جاهز!'); } catch(e){}
+  try { setStatus('وضع محلي — جاري تحديث الحدود...'); } catch(e){}
+
+  hideLoading();
+
+  setTimeout(()=>{ try { loadOSMInBackground(); } catch(e){} }, 300);
+  setTimeout(()=>{ try { map.easeTo({ center:[43.8,33.2], zoom:5.2, pitch:52, bearing:-8, duration:1400 }); } catch(e){} }, 200);
+  setTimeout(()=>{ try { applyFullVividTheme(); } catch(e){} }, 3000);
+}
+
+async function initMap() {
+  // ✅ تفعيل دعم اللغة العربية (RTL) لحل مشكلة الحروف المقطعة
+  maplibregl.setRTLTextPlugin(
+    'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.js',
+    null,
+    true
+  );
+
+  let style = null;
+
+  /* 1) محاولة جلب ستايل Liberty مع timeout 12 ثانية */
+  try {
+    const res = await fetchWithTimeout('https://tiles.openfreemap.org/styles/liberty', 12000);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    style = await res.json();
+
+    // ✅ تصحيح مسار الخطوط ليدعم الحروف العربية
+    style.glyphs = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
 
     style.layers.forEach(layer => {
-      if (layer.type === 'symbol') {
-        if (!layer.layout) layer.layout = {};
+      if(layer.type === 'symbol'){
+        if(!layer.layout) layer.layout = {};
         layer.layout['text-font'] = ['Noto Sans Regular'];
-        if (layer.layout['text-field']) {
+        if(layer.layout['text-field']){
           const fieldStr = JSON.stringify(layer.layout['text-field']);
-          if (fieldStr.includes('"name"') && !fieldStr.includes('"name:ar"')) {
+          if(fieldStr.includes('"name"') && !fieldStr.includes('"name:ar"')){
             layer.layout['text-field'] = ['coalesce', ['get', 'name:ar'], ['get', 'name']];
           }
         }
       }
     });
+  } catch(err){
+    console.warn('[IRAQ MIND MAP] Liberty style failed, using fallback:', err);
+    style = createFallbackStyle();
+    try { toast('⚠️ تم استخدام الستايل الاحتياطي', 4000); } catch(e){}
+  }
 
+  /* 2) إنشاء الخريطة */
+  try {
     map = new maplibregl.Map({
       container: 'map', style: style, center: [43.8, 33.2], zoom: 5.2,
       pitch: 52, bearing: -8, maxPitch: 85, minZoom: 3.5, maxZoom: 18,
       antialias: true, attributionControl: false
     });
-
-    map.addControl(new maplibregl.AttributionControl({compact:true}), 'bottom-right');
-    map.addControl(new maplibregl.NavigationControl({visualizePitch:true}), 'bottom-right');
-    map.addControl(new maplibregl.ScaleControl({unit:'metric',maxWidth:120}), 'bottom-right');
-
-    map.on('error', e=>{
-      if(e && e.error && /tile|404|Failed to fetch/i.test(e.error.message||'')) return;
-    });
-
-    map.on('style.load', ()=>{ applyFullVividTheme(); });
-
-    map.on('load', ()=>{
-      mapLoaded = true;
-      try{
-        progress(30, 'جاري إعداد التضاريس...');
-        setupMapBase();
-
-        progress(45, 'جاري تلوين الخريطة بألوان نيون...');
-        applyFullVividTheme();
-
-        progress(60, 'جاري رسم المحافظات...');
-        PROVINCES = buildProvinces(null);
-        addProvinceLayers();
-
-        /* ====== معالجات عامة تُسجَّل مرة واحدة فقط ====== */
-
-        // اختيار الوجهة
-        map.on('click', (e) => {
-          if (!destPicking) return;
-          destPicking = false;
-          map.getCanvas().style.cursor = '';
-          $('pickDest').classList.remove('on');
-          routeToDestination(e.lngLat.lng, e.lngLat.lat);
-        });
-
-        // تحميل ديناميكي عند تحريك الخريطة
-        map.on('moveend', () => {
-          clearTimeout(map._bldTimer);
-          if (buildingsActive) {
-            map._bldTimer = setTimeout(() => loadBuildingsForViewport(true), 1400);
-          }
-          clearTimeout(map._rdTimer);
-          if (roadsActive) {
-            map._rdTimer = setTimeout(() => loadRoadsForViewport(true), 1700);
-          }
-        });
-
-        // تعديل ارتفاع المحافظات عند التكبير
-        map.on('zoom', updateProvinceExtrusionForZoom);
-
-        progress(100, 'جاهز!');
-        setStatus('وضع محلي — جاري تحديث الحدود...');
-        setTimeout(hideLoading, 400);
-        loadOSMInBackground();
-
-        setTimeout(()=>{
-          map.easeTo({ center:[43.8,33.2], zoom:5.2, pitch:52, bearing:-8, duration:1400 });
-        }, 200);
-
-        setTimeout(applyFullVividTheme, 3000);
-      }catch(err){
-        progress(100, '⚠️ ' + err.message);
-        setTimeout(hideLoading, 2500);
-      }
-    });
-
-    setTimeout(()=>{
-      if(!mapLoaded){
-        const el = $('loadText');
-        if(el){
-          el.innerHTML = '⚠️ تأخر تحميل الخريطة. تحقق من اتصالك.' +
-            '<br><button class="retryBtn" onclick="location.reload()">إعادة المحاولة</button>';
-        }
-      }
-    }, 25000);
-
-  } catch (err) {
+  } catch(err){
+    console.error('[IRAQ MIND MAP] Map creation failed:', err);
     const el = $('loadText');
-    if(el) el.innerHTML = '⚠️ فشل تحميل الخريطة. تحقق من الإنترنت.';
-    setTimeout(hideLoading, 2000);
+    if(el){
+      el.innerHTML = '⚠️ تعذر تهيئة الخريطة (WebGL غير مدعوم؟)<br>' +
+        '<button class="retryBtn" onclick="location.reload()">إعادة المحاولة</button>';
+    }
+    hideLoading();
+    return;
   }
+
+  map.addControl(new maplibregl.AttributionControl({compact:true}), 'bottom-right');
+  map.addControl(new maplibregl.NavigationControl({visualizePitch:true}), 'bottom-right');
+  map.addControl(new maplibregl.ScaleControl({unit:'metric',maxWidth:120}), 'bottom-right');
+
+  map.on('error', e => {
+    if(e && e.error && /tile|404|Failed to fetch/i.test(e.error.message||'')) return;
+  });
+
+  /* 3) إخفاء شاشة التحميل بمجرد تحميل الستايل */
+  map.on('style.load', () => {
+    try { applyFullVividTheme(); } catch(e){}
+    setTimeout(hideLoading, 800);
+  });
+
+  /* 4) المسار الطبيعي: اكتمال التحميل */
+  map.on('load', () => {
+    mapLoaded = true;
+    onMapReady();
+  });
+
+  /* 5) شبكة أمان: بعد 15 ثانية، أجبر الجاهزية */
+  setTimeout(() => {
+    if(!mapReady){
+      console.warn('[IRAQ MIND MAP] Load timeout — forcing ready state');
+      if(map && map.isStyleLoaded()){
+        try { onMapReady(); } catch(e){ console.error(e); hideLoading(); }
+      } else {
+        hideLoading();
+      }
+    }
+  }, 15000);
+
+  /* 6) احتياطي أخير: بعد 25 ثانية أظهر رسالة خطأ */
+  setTimeout(() => {
+    if(!mapReady){
+      const el = $('loadText');
+      if(el && !loadingHidden){
+        el.innerHTML = '⚠️ تأخر تحميل الخريطة. تحقق من اتصالك.' +
+          '<br><button class="retryBtn" onclick="location.reload()">إعادة المحاولة</button>';
+      }
+      hideLoading();
+    }
+  }, 25000);
 }
 
 initMap();
 
-if(window.innerWidth < 720){
-  setTimeout(()=>$('sideList').classList.add('hidden'), 3500);
-}
+window.addEventListener('load', () => {
+  if(window.innerWidth < 720){
+    setTimeout(()=>{
+      const el = $('sideList');
+      if(el) el.classList.add('hidden');
+    }, 3500);
+  }
+});
 </script>
 </body>
 </html>
